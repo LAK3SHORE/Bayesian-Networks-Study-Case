@@ -1,0 +1,272 @@
+---
+title: "Evidencia 1. Artículo de investigación - Redes bayesianas caso discreto"
+author: "Adara Pulido, Adamaris De Dios, Cristobal Estrada, Ariel Lopez, Andrea Ruiz"
+format: pdf
+editor: visual
+bibliography: 'references.bib'
+---
+
+
+```{r}
+library(tidyverse)
+library (bnlearn)
+library(readr)
+library(stringr)
+```
+
+```{r}
+data = read.csv("new_data.csv", stringsAsFactors = TRUE)
+head(data)
+```
+
+
+PA3.3.NIVEL -\>NIVEL-\>N
+
+PA3.2 -\> Escuela anterior -\> EA
+
+PB3.3 -\> Escuela inscrita -\> EI
+
+PB3.4 -\> Razón de cambio -\> RC
+
+PA3.4 -\> No concluyó el grado -\>NC
+
+PA3.5 -\> Razón de no concluir el grado -\>RNC
+
+PB3.11.4 -\> Clases presenciales -\> P
+
+SEXO -\> S
+
+PA3.1 -\> inscrito anterior -\> IA
+
+PB3.1 -\>inscrita actual -\>IH
+
+PC3.3.1 -\>Nivel maximo de educación -\>NM
+
+PC3.6 -\> Razon por la que dejo la escuela -\>RDE
+
+```{r}
+library(bnlearn)
+```
+
+Pregunta PA3.1 ¿(NOMBRE) estuvo inscrita(o) el pasado año o ciclo escolar (2020- 2021)?-\> IPre = Inscripcion precedente
+
+Pregunta PA3.2 ¿La escuela donde (NOMBRE) estuvo inscrita(o) (asistió) el pasado ciclo escolar fue...? -\>EP = Escuela pasada
+
+Pregunta PA3.4 ¿(NOMBRE) concluyó el grado (semestre, cuatrimestre o módulo) en que estuvo inscrita(o) el pasado año o ciclo escolar (2020-2021)? -\>GCP = Grado concluido pasado
+
+Pregunta PA3.5 ¿Cuál fue la razón principal por la que (NOMBRE) no concluyó el grado (semestre, cuatrimestre o módulo)? -\>RGNC = Razon grado no concluido
+
+Pregunta PB3.1 ¿(NOMBRE) está inscrita(o) en el actual año o ciclo escolar (2021-2022) que inició en agosto/septiembre de 2021? IA -\>Incrito actualmente
+
+Pregunta PB3.3 ¿La escuela donde (NOMBRE) está inscrita(o) es...? -\> EA = Escuela actual
+
+Pregunta PB3.4 ¿Cuál fue la razón principal por la que (NOMBRE) se cambió de escuela en el actual año o ciclo escolar (2021-2022)?
+
+Pregunta PB3.5.NIVEL Actualmente, ¿en qué grado (semestre, cuatrimestre o módulo) escolar está inscrita(o) (NOMBRE)? - N
+
+Pregunta PB3.11.4 ¿Qué medio o medios utiliza(n) la(s) maestra(s) o maestro(s) de (NOMBRE), para informarle sobre las actividades escolares, impartir sus clases o para la entrega de trabajos? - Lo hacen de manera presencial
+
+Pregunta PC3.3.1 ¿(NOMBRE) hasta qué año y grado aprobó en la escuela? - NIVEL (Nivel maximo ) NG
+
+Pregunta PC3.6 ¿Cuál es la razón principal por la que (NOMBRE) dejó de asistir o interrumpió la escuela?
+
+```{r}
+colnames(data) = c("S","IPre", "EP", "GCP", "RGNC", "IA", "EA","RC","N","P","NM","RDE")
+```
+
+```{r}
+dag = empty.graph(nodes = c("S","IPre", "EP", "GCP", "RGNC", "IA", "EA","RC","N","P","NM","RDE"))
+```
+
+```{r}
+arc_set = matrix(c("S", "EP",
+                   "S", "EA",
+                   "S", "GCP",
+                   "S", "IPre",
+                   "S", "IA",
+                   "S", "N",
+                   "EP", "RC",
+                   "EA", "RC",
+                   "GCP", "RGNC",
+                   "IPre", "NM",
+                   "IA","NM",
+                   "NM","RDE",
+                   "N","P"), byrow = TRUE, ncol = 2,
+                 dimnames = list(NULL, c("from", "to")))
+```
+
+```{r}
+arcs(dag) = arc_set
+```
+
+```{r}
+dag
+```
+
+```{r}
+#install.packages("BiocManager")
+#BiocManager::install("Rgraphviz")
+```
+
+```{r}
+library(BiocManager)
+library(Rgraphviz)
+```
+
+```{r}
+graphviz.plot(dag, shape = "ellipse")
+```
+
+```{r}
+arc.strength(dag, data = data, criterion = "mi")
+```
+
+```{r}
+score(dag, data = data, type = "bic")
+```
+
+```{r}
+score(dag, data = data, type = "aic")
+```
+
+```{r}
+dag_2 = empty.graph(nodes = c("S","IPre", "EP", "GCP", "RGNC", "IA", "EA","RC","N","P","NM","RDE"))
+```
+
+```{r}
+arc_set_2 = matrix(c("S", "RC",
+                   "S", "RGNC",
+                   "S", "IPre",
+                   "S", "IA",
+                   "S", "N",
+                   "RC","EP",
+                   "RC","EA", 
+                   "RGNC","GCP",
+                   "IPre", "NM",
+                   "IA","NM",
+                   "NM","RDE",
+                   "N","P"), byrow = TRUE, ncol = 2,
+                 dimnames = list(NULL, c("from", "to")))
+```
+
+```{r}
+arcs(dag_2) = arc_set_2
+```
+
+```{r}
+dag_2
+```
+
+```{r}
+graphviz.plot(dag_2, shape = "ellipse")
+```
+
+```{r}
+arc.strength(dag_2, data = data, criterion = "mi")
+```
+
+```{r}
+score(dag_2, data = data, type = "bic")
+```
+
+```{r}
+score(dag_2, data = data, type = "aic")
+```
+
+```{r}
+dag3 = empty.graph(nodes = c("S","IPre", "EP", "GCP", "RGNC", "IA", "EA","RC","N","P","NM","RDE"))
+```
+
+```{r}
+arc_set = matrix(c("S", "EP",
+                   "S", "EA",
+                   "S", "GCP",
+                   "S", "RDE",
+                   "S", "N",
+                   "EP", "RC",
+                   "EA", "RC",
+                   "GCP", "RGNC",
+                   "IPre", "NM",
+                   "IA","NM",
+                   "RDE","IPre",
+                   "RDE","IA",
+                   "N","P"), byrow = TRUE, ncol = 2,
+                 dimnames = list(NULL, c("from", "to")))
+```
+
+```{r}
+arcs(dag3) = arc_set
+```
+
+```{r}
+dag3
+```
+
+```{r}
+graphviz.plot(dag3, shape = "ellipse")
+```
+
+```{r}
+arc.strength(dag3, data = data, criterion = "mi")
+```
+
+```{r}
+score(dag3, data = data, type = "bic")
+```
+
+```{r}
+score(dag3, data = data, type = "aic")
+```
+
+
+```{r}
+best_dag = hc(data)
+```
+
+```{r}
+modelstring(best_dag)
+```
+
+```{r}
+score(best_dag, data = data, type = "bic")
+score(best_dag, data = data, type = "aic")
+```
+
+```{r}
+graphviz.plot(best_dag, shape = "ellipse")
+```
+
+```{r}
+arc.strength(best_dag, data = data, criterion = "mi")
+```
+
+```{r}
+table(data$RC)
+```
+
+```{r}
+table(data$S, data$GCP, data$RGNC)
+```
+
+```{r}
+cpquery(fit = bn.fit(best_dag, data), 
+        event = (GCP == "No"), 
+        evidence = (S == "F" & RGNC == "Covid-19"))
+```
+
+```{r}
+cpquery(fit = bn.fit(best_dag, data), 
+        event = (GCP == "No"), 
+        evidence = (S == "F" & RGNC == "trabajo"))
+```
+
+```{r}
+table(data$N, data$P)
+```
+
+```{r}
+table(data$NM, data$RDE)
+```
+
+
+

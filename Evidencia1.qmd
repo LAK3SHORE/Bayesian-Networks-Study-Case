@@ -1,6 +1,6 @@
 ---
 title: "Evidencia 1. Artículo de investigación - Redes bayesianas caso discreto"
-author: "Adara Pulido, Adamaris De Dios, Cristobal Estrada, Ariel Lopez, Andrea Ruiz"
+author: "Adara Pulido, Adamaris De Dios, Cristobal Estrada"
 format: pdf
 editor: visual
 bibliography: 'references.bib'
